@@ -1,3 +1,1 @@
-# H-MVCL
-
-Repository for H-MVCL project.
+The rapid proliferation of encryption protocols (SSL/TLS) has rendered Deep Packet Inspection (DPI) ineffective, necessitating flow-based Deep Learning (DL) classifiers. However, existing DL approaches face degradation under label scarcity and struggle to distinguish complex streaming behaviors. To address these limitations, we developed \textbf{Res-HMVCL}, a framework integrating 1D-CNN payload representations, bi-directional flow statistics, and Spectral (FFT) features via a residual contrastive mechanism. We introduce \textit{Universal Contrastive Pre-training} to learn traffic manifolds from unlabeled data. Experimental results on ISCXVPN2016 demonstrate an F1-Score of 94\% and 87\% for binary and category classification respectively using only 20\% labeled data, with a critical stability threshold identified at 10\% labeled data, significantly outperforming SOTA baselines in data efficiency.
