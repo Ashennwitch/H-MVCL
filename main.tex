@@ -1,0 +1,103 @@
+\documentclass[lettersize,journal]{IEEEtran}
+\usepackage{amsmath,amsfonts}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{array}
+\usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
+\usepackage{textcomp}
+\usepackage{stfloats}
+\usepackage{url}
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{cite}
+\usepackage{lipsum}
+\hyphenation{op-tical net-works semi-conduc-tor IEEE-Xplore}
+% updated with editorial comments 8/9/2021
+
+\begin{document}
+
+\title{Res-HMVCL: A Residual Heterogeneous Multi-View Contrastive Learning for Encrypted Traffic Classification under Extreme Label Scarcity}
+
+\author{Hanif Nur Ilham Sanjaya , Alfan Presekal}
+
+% The paper headers
+\markboth{IEE Transaction Journal \LaTeX\ Class Files,~Vol.~xx, No.~xx, January~2026}%
+{Shell \MakeLowercase{\textit{et al.}}: A Sample Article Using IEEEtran.cls for IEEE Journals}
+
+\IEEEpubid{0000--0000/00\$00.00~\copyright~2021 IEEE}
+% Remember, if you use this you must call \IEEEpubidadjcol in the second
+% column for its text to clear the IEEEpubid mark.
+
+\maketitle
+
+\begin{abstract}
+ The rapid proliferation of encryption protocols (SSL/TLS) has rendered Deep Packet Inspection (DPI) ineffective, necessitating flow-based Deep Learning (DL) classifiers. However, existing DL approaches face degradation under label scarcity and struggle to distinguish complex streaming behaviors. To address these limitations, we developed \textbf{Res-HMVCL}, a framework integrating 1D-CNN payload representations, bi-directional flow statistics, and Spectral (FFT) features via a residual contrastive mechanism. We introduce \textit{Universal Contrastive Pre-training} to learn traffic manifolds from unlabeled data. Experimental results on ISCXVPN2016 demonstrate an F1-Score of 94\% and 87\% for binary and category classification respectively using only 20\% labeled data, with a critical stability threshold identified at 10\% labeled data, significantly outperforming SOTA baselines in data efficiency.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Cyber security, Digital Substation, Kyber, DIlithium , GOOSE, HMAC, Post-Quantum Cryptography .
+\end{IEEEkeywords}
+
+\input{section1_introduction}
+\input{section2_design}
+
+
+\section{Conclusion}
+The conclusion goes here \cite{ref1}.
+
+
+\section*{Acknowledgments}
+This should be a simple paragraph before the References to thank those individuals and institutions who have supported your work on this article.
+
+
+
+
+
+
+
+%{\appendices
+%\section*{Proof of the First Zonklar Equation}
+%Appendix one text goes here.
+% You can choose not to have a title for an appendix if you want by leaving the argument blank
+%\section*{Proof of the Second Zonklar Equation}
+%Appendix two text goes here.}
+
+
+
+% References
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+
+\newpage
+
+\section{Biography Section}
+If you have an EPS/PDF photo (graphicx package needed), extra braces are
+ needed around the contents of the optional argument to biography to prevent
+ the LaTeX parser from getting confused when it sees the complicated
+ $\backslash${\tt{includegraphics}} command within an optional argument. (You can create
+ your own custom macro containing the $\backslash${\tt{includegraphics}} command to make things
+ simpler here.)
+ 
+\vspace{11pt}
+
+\bf{If you include a photo:}\vspace{-33pt}
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{fig1}}]{Michael Shell}
+Use $\backslash${\tt{begin\{IEEEbiography\}}} and then for the 1st argument use $\backslash${\tt{includegraphics}} to declare and link the author photo.
+Use the author name as the 3rd argument followed by the biography text.
+\end{IEEEbiography}
+
+\vspace{11pt}
+
+\bf{If you will not include a photo:}\vspace{-33pt}
+\begin{IEEEbiographynophoto}{John Doe}
+Use $\backslash${\tt{begin\{IEEEbiographynophoto\}}} and the author name as the argument followed by the biography text.
+\end{IEEEbiographynophoto}
+
+
+
+
+\vfill
+
+\end{document}
+
