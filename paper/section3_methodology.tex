@@ -1,0 +1,215 @@
+\section{Methodology}
+\label{sec:methodology}
+
+\subsection{Dataset Curation and Preprocessing}
+\label{subsec:dataset_curation}
+
+To ensure robust generalization across different network environments, we utilized two distinct encrypted traffic datasets: the widely-used ISCX-VPN-2016 benchmark and the VNAT dataset.
+
+\subsubsection{Data Sources}
+\begin{itemize}
+    \item ISCX-VPN-2016 \cite{draper2016characterization}: The primary benchmark for encrypted traffic analysis, containing real-world traffic generated from Alice and Bob scenarios. It encompasses 7 specific traffic categories (e.g., Browsing, Email, Streaming) and 16 granular applications captured over both standard and VPN channels.
+    \item VNAT (VPN/Non-VPN Application Traffic) \cite{vnat_dataset}: To augment the diversity of our training corpus, we incorporated the VNAT dataset from MIT Lincoln Laboratory. This dataset includes PCAP captures of both encrypted and unencrypted flows across 10 distinct applications (including SSH, RDP, and Zoiper) generated in a controlled virtual subnet environment, providing high-fidelity samples for background traffic and specific tunneling behaviors.
+\end{itemize}
+
+% Use figure* (with an asterisk) for full-width images
+\begin{figure*}[ht] 
+    \centering
+    % width=\textwidth fills the printable area from left margin to right margin
+    \includegraphics[width=\textwidth]{iscx_dist.png}
+    \caption{Distribution of the clean ISCX dataset.}
+    \label{fig:iscx_dist}
+\end{figure*}
+
+% Use figure* (with an asterisk) for full-width images
+\begin{figure*}[ht] 
+    \centering
+    % width=\textwidth fills the printable area from left margin to right margin
+    \includegraphics[width=\textwidth]{vnat_dist.png}
+    \caption{Distribution of the clean VNAT dataset.}
+    \label{fig:vnat_dist}
+\end{figure*}
+
+\begin{table}[htbp]
+\caption{Summary of Preprocessing Rules}
+\label{tab:preprocessing_rules}
+\centering
+\begin{tabular}{l l l}
+\hline
+\textbf{Filter Type} & \textbf{Condition} & \textbf{Action} \\
+\hline
+Protocol & DNS, NTP, DHCP & Drop \\
+Port Specific & UDP 137 (NBNS), UDP 5355 (LLMNR) & Drop \\
+TCP Integrity & First Packet $\neq$ SYN & Drop \\
+UDP Noise & DstIP=255.255.255.255 AND Payload $\in$ 'Beacon$\sim$' & Drop \\
+Min Length & Packet Count $< 2$ & Drop \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Preprocessing Pipeline}
+Raw packet captures were first segmented into bidirectional flows based on the standard 5-tuple identifier (Source IP, Destination IP, Source Port, Destination Port, Protocol) using the SplitCap tool. To ensure data quality and comparability with state-of-the-art benchmarks, we strictly implemented the cleaning and filtering protocol defined by Park et al. \cite{park2024fast}. The pipeline consists of four critical stages that are summarized in Table \ref{tab:preprocessing_rules}.
+
+\begin{enumerate}
+    \item Noise \& Background Traffic Removal:
+    We filtered out infrastructure traffic irrelevant to the target application classification. This includes removing protocols such as DNS (Port 53), NTP (Port 123), and DHCP (Port 67/68). Additionally, consistent with \cite{park2024fast}, we explicitly dropped NetBIOS Name Service (NBNS) traffic on UDP port 137 and Link-Local Multicast Name Resolution (LLMNR) on UDP port 5355.
+
+    \item TCP Connection Sanity Check:
+    To ensure the integrity of TCP flows used for payload analysis, we discarded any TCP flow that did not begin with a valid handshake initiation. Specifically, we filtered out flows where the first packet did not contain the \texttt{SYN} flag (Flag 'S'), eliminating incomplete or mid-stream captured connections.
+
+    \item Beacon \& Broadcast Filtering:
+    We observed specific recurrent UDP broadcast patterns that do not carry user-generated content. We applied a rule to remove UDP flows directed to the broadcast IP \texttt{255.255.255.255} that contained the specific payload signature ``\texttt{Beacon$\sim$}''. This step is crucial for removing local discovery noise that can skew statistical feature distributions.
+    
+    \item Short Flow Pruning:
+    Flows containing fewer than 2 packets were discarded as they lack sufficient information for both the temporal statistical view (Inter-Arrival Times) and the payload contrastive view.
+\end{enumerate}
+
+Following this rigorous filtration process, we obtained a final dataset that is based on its distribution as shown in Fig. \ref{fig:iscx_dist} and \ref{fig:vnat_dist}.
+
+
+% ==========================
+
+\subsection{Multi-View Feature Generation}
+\label{subsec:feature_generation}
+
+To overcome the limitations of single-view classification, the LE-MVCL framework constructs a composite representation of network traffic by fusing learned semantic representations with engineered statistical fingerprints, following the common multimodal design of jointly leveraging payload-derived and flow-level information for encrypted traffic classification \cite{zeng2019deep,chen2025mff}. Let a network flow $\mathcal{F}$ be defined as a sequence of packets $\mathcal{F} = \{p_1, p_2, \dots, p_K\}$, where each packet $p_i$ is a tuple $(h_i, \mathbf{b}_i, t_i)$ consisting of header information $h_i$, a payload byte sequence $\mathbf{b}_i$, and an arrival timestamp $t_i$. This multi-view approach addresses the duality of encrypted traffic, where the payload carries protocol-specific signatures ($\alpha$) while the flow dynamics reveal application-layer behaviors ($\beta, \gamma, \beta'_{FFT}$).
+
+\subsubsection{View 1: Learned Payload Representation (The Alpha Component)}
+\label{subsubsec:alpha_view}
+
+The first view, termed the ``Alpha'' component ($\alpha$), functions as a semantic extractor designed to identify non-linear dependencies in the protocol handshake—such as TLS Client Hello extensions or cipher suite negotiations—that remain invisible to pure time-series analysis. This viewpoint is consistent with recent datagram-level representation learning approaches that directly model encrypted payload bytes with deep encoders (e.g., pre-trained transformers) \cite{lin2022etbert}. This viewpoint is consistent with recent datagram-level representation learning approaches that directly model encrypted payload bytes with deep encoders (e.g., pre-trained transformers) \cite{lin2022etbert}.
+
+Following the standard Deep Packet Inspection (DPI) methodology established in \cite{lotfollahi2020deep}, we isolate the first $N=10$ packets of the flow. Let $\mathbf{B}_{raw}$ denote the concatenated sequence of payload bytes from these packets:
+\begin{equation}
+    \mathbf{B}_{raw} = \bigoplus_{i=1}^{N} \mathbf{b}_i
+\end{equation}
+where $\oplus$ denotes the concatenation operator. To ensure a uniform input dimension for the neural network, $\mathbf{B}_{raw}$ is strictly truncated or zero-padded to a fixed length $L=784$ bytes. This specific window size is selected to capture the critical initial handshake phase where unencrypted metadata, such as the Server Name Indication (SNI), is typically exchanged \cite{wang2017end} \cite{rfc6066}.
+
+The raw integer byte sequence $\mathbf{x} \in \{0, \dots, 255\}^L$ is normalized to the interval $[0,1]$ via min-max scaling:
+\begin{equation}
+    \hat{x}_j = \frac{x_j}{255}, \quad \forall j \in \{1, \dots, L\}
+\end{equation}
+
+Rather than using these raw bytes directly, we pass the normalized sequence $\hat{\mathbf{x}}$ through a pre-trained 1D-Convolutional Neural Network (1D-CNN) encoder, denoted as $f_{\theta}(\cdot)$. This encoder compresses the high-dimensional input into a dense latent vector $\mathbf{z}_{\alpha} \in \mathbb{R}^{128}$:
+\begin{equation}
+    \mathbf{z}_{\alpha} = f_{\theta}(\hat{\mathbf{x}})
+\end{equation}
+This vector $\mathbf{z}_{\alpha}$ effectively distills the sparse raw bytes into a compact semantic signature associated with the specific application protocol.
+
+\subsubsection{View 2: Global Statistical Signatures (The Greek Components)}
+\label{subsubsec:greek_view}
+
+While encryption effectively masks payload content, it cannot fully obfuscate global traffic patterns. To capture these leakage channels, we engineer a set of statistical features collectively termed the ``Greek'' components. This perspective is aligned with recent flow-level sequence modeling work that explicitly targets packet-to-packet dynamics within a flow \cite{chen2024miett}. This perspective is aligned with recent flow-level sequence modeling work that explicitly targets packet-to-packet dynamics within a flow \cite{chen2024miett}.
+
+\paragraph{Flow Dynamics ($\beta$)}
+The foundation of the statistical view is the $\beta$ component. Let $S = \{|p_1|, \dots, |p_K|\}$ be the sequence of packet sizes and $T = \{\Delta t_1, \dots, \Delta t_{K-1}\}$ be the sequence of Inter-Arrival Times (IAT), where $\Delta t_i = t_{i+1} - t_i$. We define a statistical extraction function $\Phi(\cdot)$ that computes the first four statistical moments (Mean $\mu$, Variance $\sigma^2$, Skewness $\gamma_1$, Kurtosis $\kappa$) along with the Min and Max values:
+\begin{equation}
+    \Phi(\mathbf{v}) = \left[ \min(\mathbf{v}), \max(\mathbf{v}), \mu_{\mathbf{v}}, \sigma_{\mathbf{v}}, \frac{\mathbb{E}[(\mathbf{v}-\mu)^3]}{\sigma^3}, \frac{\mathbb{E}[(\mathbf{v}-\mu)^4]}{\sigma^4} \right]
+\end{equation}
+The final feature vector $\mathbf{v}_{\beta}$ is the concatenation of these statistics computed bi-directionally (forward and backward flows) for both $S$ and $T$, distinguishing the request-response nature of interactive protocols \cite{draper2016characterization}.
+
+\paragraph{Burst Behavior ($\gamma$)}
+To model application-layer buffering strategies, we employ the $\gamma$ component. We define a ``burst'' as a subsequence of packets arriving with high frequency. A set of packets $\{p_i, \dots, p_{i+m}\}$ forms a burst $B_j$ if the IAT between all adjacent packets in the sequence is below a dynamic threshold $\tau$ (typically $\tau < 1.0s$):
+\begin{equation}
+    B_j = \{ p_k \mid \Delta t_{k-1} < \tau \}
+\end{equation}
+From the set of all bursts $\mathcal{B} = \{B_1, \dots, B_M\}$, we extract features such as Burst Density (bytes per burst) and the Active-to-Idle Ratio ($R_{AI}$):
+\begin{equation}
+    R_{AI} = \frac{\sum_{j=1}^{M} \text{duration}(B_j)}{\text{TotalFlowDuration} - \sum_{j=1}^{M} \text{duration}(B_j)}
+\end{equation}
+This view specifically targets the "ON-OFF" transmission patterns characteristic of video buffering \cite{dubin2017experimental}.
+
+\paragraph{Spectral Analysis ($\beta'_{FFT}$)}
+Finally, to detect automated behavior hidden within the noise, we utilize the $\beta'_{FFT}$ component. We apply the Discrete Fourier Transform (DFT) to the sequence of Packet Sizes $S$ to convert the time-domain signal into the frequency domain $X[k]$:
+\begin{equation}
+    X[k] = \sum_{n=0}^{N-1} s_n \cdot e^{-i 2\pi k n / N}
+\end{equation}
+From the resulting power spectrum $|X[k]|^2$, we extract the Top-$K$ dominant frequencies and the Spectral Entropy ($H_{spec}$), defined as:
+\begin{equation}
+    H_{spec} = -\sum_{k=1}^{K} P(k) \log_2 P(k), \quad \text{where } P(k) = \frac{|X[k]|^2}{\sum_j |X[j]|^2}
+\end{equation}
+This frequency-domain analysis identifies periodic "heartbeat" signals often generated by VPN keep-alive packets, appearing as distinct peaks (low entropy) in the frequency spectrum \cite{shin2020encrypted}.
+
+\subsection{Phase I: Asymmetric Multi-View Pre-training}
+\label{subsec:phase1_contrastive}
+
+To surmount the limitations of label scarcity, LE-MVCL introduces an asymmetric self-supervised pre-training strategy. We utilize a dual-branch architecture designed to align the latent representations of the \textit{Alpha} component (raw payload) with the diverse statistical properties of the \textit{Beta}, \textit{Gamma}, and \textit{FFT} components. The core objective is not merely alignment, but using the high-level statistical view as a "semantic guide" to force the CNN to learn robust behavioral patterns from raw bytes. The complete pre-training procedure is outlined in Algorithm \ref{alg:pretraining}.
+
+\subsubsection{Architecture Overview}
+The framework consists of two parallel encoders with distinct inductive biases:
+
+\begin{itemize}
+    \item Branch A (Payload View - Alpha): A Deep 1D-CNN processes the raw payload sequence $x_{\alpha} \in \mathbb{R}^{1024}$ to produce a semantic representation $h_{cnn}$. This is followed by a non-linear projection head (Dense $\rightarrow$ ReLU $\rightarrow$ Dense) to map the representation to a lower-dimensional embedding $z_{pay} \in \mathbb{R}^{64}$.
+    
+    \item Branch B (Statistical View - Beta/Gamma/FFT): A Deep MLP encoder processes the concatenated statistical components $x_{stat} = [x_{\beta}, x_{\gamma}, x_{fft}] \in \mathbb{R}^{N_{stat}}$. It comprises a dense layer (256 units, ReLU), a Dropout layer ($p=0.3$) for regularization, and a second dense layer (128 units). A symmetric projection head maps this to $z_{stat} \in \mathbb{R}^{64}$.
+\end{itemize}
+
+\subsubsection{Objective Function (Asymmetric NT-Xent)}
+We employ the Normalized Temperature-scaled Cross Entropy (NT-Xent) loss to maximize the mutual information between the payload and statistical views. For a minibatch of $N$ flows, we treat the statistical view $z_{stat}$ as the anchor to guide the payload view $z_{pay}$. For a given flow $i$, the loss function is defined as:
+
+\begin{equation}
+    \ell_{i,j} = -\log \frac{\exp(\text{sim}(z_{pay}^{(i)}, z_{stat}^{(i)}) / \tau)}{\sum_{k=1}^{2N} \mathbb{1}_{[k \neq i]} \exp(\text{sim}(z_{pay}^{(i)}, z_{k}) / \tau)}
+\end{equation}
+
+where $\text{sim}(u, v) = u^T v / \|u\| \|v\|$ denotes cosine similarity, $\mathbb{1}$ is the indicator function, and $\tau=0.1$ is the temperature parameter. By minimizing this loss, we enforce the 1D-CNN to implicitly learn the "global" flow dynamics (e.g., burstiness encoded in Branch B) solely from the "local" packet bytes, effectively transferring knowledge from the statistical domain to the payload domain without manual labels.
+
+\begin{algorithm}[H]
+\caption{LE-MVCL Asymmetric Pre-training Strategy}
+\label{alg:pretraining}
+\begin{algorithmic}[1]
+\REQUIRE Unlabeled Dataset $\mathcal{D} = \{ (x_{\alpha}^{(i)}, x_{stat}^{(i)}) \}_{i=1}^{M}$
+\REQUIRE Encoders $f_{\theta}$ (CNN), $g_{\phi}$ (MLP)
+\REQUIRE Projection Heads $h_{\theta}$, $h_{\phi}$
+\REQUIRE Batch Size $N$, Temperature $\tau$
+\STATE Initialize parameters $\theta, \phi$ randomly
+\FOR{\textbf{each} minibatch $\mathcal{B} = \{ (x_{\alpha}^{(k)}, x_{stat}^{(k)}) \}_{k=1}^{N}$ from $\mathcal{D}$}
+    \STATE \textit{// Forward Pass}
+    \STATE $v_{cnn} \leftarrow f_{\theta}(x_{\alpha})$ \COMMENT{Deep Semantic Features}
+    \STATE $v_{mlp} \leftarrow g_{\phi}(x_{stat})$ \COMMENT{Deep Statistical Features}
+    \STATE $z_{pay} \leftarrow h_{\theta}(v_{cnn})$, \quad $z_{stat} \leftarrow h_{\phi}(v_{mlp})$ \COMMENT{Project to latent space}
+    \STATE
+    \STATE \textit{// Compute Contrastive Loss}
+    \STATE Compute similarity matrix $S = z_{pay} \cdot z_{stat}^T / (\tau \|z_{pay}\| \|z_{stat}\|)$
+    \STATE $\mathcal{L}_{batch} \leftarrow \text{NT-Xent}(S)$ \COMMENT{Maximize agreement}
+    \STATE
+    \STATE \textit{// Update Weights}
+    \STATE Update $\theta, \phi$ using Adam Optimizer to minimize $\mathcal{L}_{batch}$
+\ENDFOR
+\STATE \textbf{Return} Pre-trained CNN Encoder $f_{\theta^*}$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Phase II: Hybrid Late-Fusion \& Fine-Tuning}
+\label{subsec:phase2_finetuning}
+
+A critical architectural insight of LE-MVCL is the \textit{Hybrid Late-Fusion} strategy employed during the inference and fine-tuning stage. We empirically observed that projecting statistical features into a dense latent space (via the MLP) causes a loss of granular precision. Therefore, we propose a fusion mechanism that combines deep learned embeddings with raw statistical metrics.
+
+\subsubsection{Fusion Mechanism}
+Upon completion of pre-training, we discard the MLP encoder and the projection heads. We retain the pre-trained 1D-CNN encoder to extract robust semantic embeddings ($h_{cnn}$). The final feature vector for a flow is constructed by concatenating these embeddings with the normalized raw statistical components:
+
+\begin{equation}
+    \mathbf{v}_{final} = \text{Concat}\left( f_{\theta^*}(x_{\alpha}), \hat{x}_{\beta}, \hat{x}_{\gamma}, \hat{x}_{fft} \right)
+\end{equation}
+
+where $\hat{x}$ represents the Z-score normalized vectors of the flow dynamics, burst behavior, and spectral features. This hybrid approach ensures the model leverages the non-linear pattern recognition of the CNN (for obfuscation detection) while preserving the explicit resolution of metrics like Inter-Arrival Time (IAT) and burst duration, which are critical for distinguishing fine-grained VPN services (e.g., distinguishing Skype's VoIP patterns from Hangouts).
+
+\subsubsection{Supervised Fine-Tuning}
+The fused vector $\mathbf{v}_{final}$ is fed into an Extreme Gradient Boosting (XGBoost) classifier for the final decision. This ensemble method effectively handles the heterogeneity of the fused features. After extensive hyperparameter tuning, we selected the best-performing XGBoost configuration for the hybrid feature vector, as summarized in Table~\ref{tab:xgb_hyperparams}:
+
+\begin{table}[htbp]
+\centering
+\caption{Best-performing XGBoost hyperparameters for the hybrid feature vector.}
+\label{tab:xgb_hyperparams}
+\begin{tabular}{l l}
+\hline
+\textbf{Hyperparameter} & \textbf{Value} \\
+\hline
+Estimators & 200 \\
+Max Depth & 6 \\
+Learning Rate & 0.05 \\
+Subsample/Colsample & 0.8 \\
+\hline
+\end{tabular}
+\end{table}
+
+To handle class imbalance (e.g., rare VPN applications), we apply a \textit{Sample Weighting} strategy where weights are inversely proportional to class frequencies during the tree building process.

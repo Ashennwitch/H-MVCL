@@ -1,0 +1,255 @@
+5 % labeled:
+========================================
+ EXPERIMENT 1: BINARY DETECTION
+========================================
+
+>>> Starting Task: Binary Task
+    Data Shape: (12555, 265)
+    Train: 627 | Test: 11928
+    >>> Binary Task Macro F1: 0.8982
+              precision    recall  f1-score   support
+
+     Non-VPN     0.9616    0.9469    0.9542      9314
+         VPN     0.8205    0.8653    0.8423      2614
+
+    accuracy                         0.9290     11928
+   macro avg     0.8910    0.9061    0.8982     11928
+weighted avg     0.9307    0.9290    0.9297     11928
+
+
+========================================
+ EXPERIMENT 2: VPN CATEGORY CLASSIFICATION
+========================================
+VPN Samples: 2751
+
+>>> Starting Task: VPN Category
+    Data Shape: (2751, 265)
+    Train: 137 | Test: 2614
+    >>> VPN Category Macro F1: 0.7066
+                   precision    recall  f1-score   support
+
+         VPN_Chat     0.3281    0.1148    0.1700       183
+        VPN_Email     0.9346    0.7937    0.8584       126
+VPN_File Transfer     0.7626    0.8268    0.7934       785
+          VPN_P2P     0.9037    0.8484    0.8752       343
+    VPN_Streaming     0.7310    0.8250    0.7752       280
+         VPN_VoIP     0.7442    0.7915    0.7672       897
+
+         accuracy                         0.7659      2614
+        macro avg     0.7341    0.7000    0.7066      2614
+     weighted avg     0.7493    0.7659    0.7527      2614
+
+
+========================================
+ EXPERIMENT 3: VPN APPLICATION (Top 6)
+========================================
+Top 6 App Samples: 2411
+
+>>> Starting Task: VPN Top 6 Apps
+    Data Shape: (2411, 265)
+    Train: 120 | Test: 2291
+    >>> VPN Top 6 Apps Macro F1: 0.7517
+                precision    recall  f1-score   support
+
+VPN_BitTorrent     0.7963    0.8776    0.8350       343
+     VPN_Email     0.6802    0.9286    0.7852       126
+  VPN_Facebook     0.5613    0.5129    0.5360       232
+   VPN_Hangout     0.6286    0.8800    0.7333       300
+     VPN_Skype     0.9302    0.7984    0.8593      1151
+   VPN_YouTube     0.8182    0.7122    0.7615       139
+
+      accuracy                         0.7940      2291
+     macro avg     0.7358    0.7850    0.7517      2291
+  weighted avg     0.8127    0.7940    0.7964      2291
+  
+  10 % labeled:
+  ========================================
+ EXPERIMENT 1: BINARY DETECTION
+========================================
+
+>>> Starting Task: Binary Task
+    Data Shape: (12555, 265)
+    Train: 1255 | Test: 11300
+    >>> Binary Task Macro F1: 0.9218
+              precision    recall  f1-score   support
+
+     Non-VPN     0.9747    0.9544    0.9644      8824
+         VPN     0.8488    0.9116    0.8791      2476
+
+    accuracy                         0.9450     11300
+   macro avg     0.9117    0.9330    0.9218     11300
+weighted avg     0.9471    0.9450    0.9457     11300
+
+
+========================================
+ EXPERIMENT 2: VPN CATEGORY CLASSIFICATION
+========================================
+VPN Samples: 2751
+
+>>> Starting Task: VPN Category
+    Data Shape: (2751, 265)
+    Train: 275 | Test: 2476
+    >>> VPN Category Macro F1: 0.7871
+                   precision    recall  f1-score   support
+
+         VPN_Chat     0.6630    0.3526    0.4604       173
+        VPN_Email     0.8320    0.8667    0.8490       120
+VPN_File Transfer     0.8211    0.8587    0.8395       743
+          VPN_P2P     0.9555    0.8585    0.9044       325
+    VPN_Streaming     0.7792    0.9057    0.8377       265
+         VPN_VoIP     0.8163    0.8471    0.8314       850
+
+         accuracy                         0.8247      2476
+        macro avg     0.8112    0.7815    0.7871      2476
+     weighted avg     0.8221    0.8247    0.8190      2476
+
+
+========================================
+ EXPERIMENT 3: VPN APPLICATION (Top 6)
+========================================
+Top 6 App Samples: 2411
+
+>>> Starting Task: VPN Top 6 Apps
+    Data Shape: (2411, 265)
+    Train: 241 | Test: 2170
+    >>> VPN Top 6 Apps Macro F1: 0.8462
+                precision    recall  f1-score   support
+
+VPN_BitTorrent     0.9083    0.9754    0.9407       325
+     VPN_Email     0.8898    0.8750    0.8824       120
+  VPN_Facebook     0.7432    0.6182    0.6749       220
+   VPN_Hangout     0.7267    0.8803    0.7962       284
+     VPN_Skype     0.9375    0.9083    0.9226      1090
+   VPN_YouTube     0.9000    0.8244    0.8606       131
+
+      accuracy                         0.8783      2170
+     macro avg     0.8509    0.8469    0.8462      2170
+  weighted avg     0.8809    0.8783    0.8777      2170
+  
+  20 % labeled:
+========================================
+ EXPERIMENT 1: BINARY DETECTION
+========================================
+
+>>> Starting Task: Binary Task
+    Data Shape: (12555, 265)
+    Train: 2511 | Test: 10044
+    >>> Binary Task Macro F1: 0.9448
+              precision    recall  f1-score   support
+
+     Non-VPN     0.9852    0.9649    0.9749      7843
+         VPN     0.8836    0.9482    0.9147      2201
+
+    accuracy                         0.9613     10044
+   macro avg     0.9344    0.9566    0.9448     10044
+weighted avg     0.9629    0.9613    0.9618     10044
+
+
+========================================
+ EXPERIMENT 2: VPN CATEGORY CLASSIFICATION
+========================================
+VPN Samples: 2751
+
+>>> Starting Task: VPN Category
+    Data Shape: (2751, 265)
+    Train: 550 | Test: 2201
+    >>> VPN Category Macro F1: 0.8478
+                   precision    recall  f1-score   support
+
+         VPN_Chat     0.7455    0.5325    0.6212       154
+        VPN_Email     0.8738    0.8491    0.8612       106
+VPN_File Transfer     0.8529    0.9123    0.8816       661
+          VPN_P2P     0.9586    0.9619    0.9603       289
+    VPN_Streaming     0.8199    0.9449    0.8780       236
+         VPN_VoIP     0.9068    0.8636    0.8847       755
+
+         accuracy                         0.8760      2201
+        macro avg     0.8596    0.8440    0.8478      2201
+     weighted avg     0.8752    0.8760    0.8734      2201
+
+
+========================================
+ EXPERIMENT 3: VPN APPLICATION (Top 6)
+========================================
+Top 6 App Samples: 2411
+
+>>> Starting Task: VPN Top 6 Apps
+    Data Shape: (2411, 265)
+    Train: 482 | Test: 1929
+    >>> VPN Top 6 Apps Macro F1: 0.8995
+                precision    recall  f1-score   support
+
+VPN_BitTorrent     0.9590    0.9723    0.9656       289
+     VPN_Email     0.9216    0.8868    0.9038       106
+  VPN_Facebook     0.8057    0.7231    0.7622       195
+   VPN_Hangout     0.8269    0.9249    0.8731       253
+     VPN_Skype     0.9614    0.9505    0.9559       969
+   VPN_YouTube     0.9322    0.9402    0.9362       117
+
+      accuracy                         0.9233      1929
+     macro avg     0.9011    0.8996    0.8995      1929
+  weighted avg     0.9237    0.9233    0.9229      1929
+  
+  30 % labeled:
+========================================
+ EXPERIMENT 1: BINARY DETECTION
+========================================
+
+>>> Starting Task: Binary Task
+    Data Shape: (12555, 265)
+    Train: 3766 | Test: 8789
+    >>> Binary Task Macro F1: 0.9493
+              precision    recall  f1-score   support
+
+     Non-VPN     0.9882    0.9658    0.9769      6863
+         VPN     0.8871    0.9590    0.9217      1926
+
+    accuracy                         0.9643      8789
+   macro avg     0.9377    0.9624    0.9493      8789
+weighted avg     0.9661    0.9643    0.9648      8789
+
+
+========================================
+ EXPERIMENT 2: VPN CATEGORY CLASSIFICATION
+========================================
+VPN Samples: 2751
+
+>>> Starting Task: VPN Category
+    Data Shape: (2751, 265)
+    Train: 825 | Test: 1926
+    >>> VPN Category Macro F1: 0.8711
+                   precision    recall  f1-score   support
+
+         VPN_Chat     0.7327    0.5522    0.6298       134
+        VPN_Email     0.9634    0.8495    0.9029        93
+VPN_File Transfer     0.8908    0.9031    0.8969       578
+          VPN_P2P     0.9647    0.9723    0.9685       253
+    VPN_Streaming     0.8756    0.9517    0.9120       207
+         VPN_VoIP     0.9055    0.9274    0.9163       661
+
+         accuracy                         0.8988      1926
+        macro avg     0.8888    0.8594    0.8711      1926
+     weighted avg     0.8964    0.8988    0.8963      1926
+
+
+========================================
+ EXPERIMENT 3: VPN APPLICATION (Top 6)
+========================================
+Top 6 App Samples: 2411
+
+>>> Starting Task: VPN Top 6 Apps
+    Data Shape: (2411, 265)
+    Train: 723 | Test: 1688
+    >>> VPN Top 6 Apps Macro F1: 0.9131
+                precision    recall  f1-score   support
+
+VPN_BitTorrent     0.9650    0.9802    0.9725       253
+     VPN_Email     0.9149    0.9247    0.9198        93
+  VPN_Facebook     0.8047    0.7953    0.8000       171
+   VPN_Hangout     0.8410    0.9095    0.8739       221
+     VPN_Skype     0.9794    0.9517    0.9653       848
+   VPN_YouTube     0.9333    0.9608    0.9469       102
+
+      accuracy                         0.9336      1688
+     macro avg     0.9064    0.9204    0.9131      1688
+  weighted avg     0.9351    0.9336    0.9341      1688

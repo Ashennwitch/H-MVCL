@@ -1,0 +1,117 @@
+\documentclass[lettersize,journal]{IEEEtran}
+\usepackage{amsmath,amsfonts}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
+\usepackage{textcomp}
+\usepackage{stfloats}
+\usepackage{url}
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{cite}
+\usepackage{lipsum}
+\hyphenation{op-tical net-works semi-conduc-tor IEEE-Xplore}
+% updated with editorial comments 8/9/2021
+
+\begin{document}
+
+\title{LE-MVCL: Label-Efficient Encrypted Traffic Classification via Asymmetric Multi-View Contrastive Learning}
+
+\author{Hanif Nur Ilham Sanjaya, Alfan Presekal}
+
+% The paper headers
+\markboth{IEE Transaction Journal \LaTeX\ Class Files,~Vol.~xx, No.~xx, January~2026}%
+{Shell \MakeLowercase{\textit{et al.}}: A Sample Article Using IEEEtran.cls for IEEE Journals}
+
+\IEEEpubid{0000--0000/00\$00.00~\copyright~2021 IEEE}
+% Remember, if you use this you must call \IEEEpubidadjcol in the second
+% column for its text to clear the IEEEpubid mark.
+
+\maketitle
+
+\begin{abstract}
+The rapid proliferation of encrypted tunneling protocols, particularly Virtual Private Networks (VPNs), has rendered traditional Deep Packet Inspection (DPI) ineffective, creating an urgent need for classification methods that are both robust and label-efficient. To address this challenge, we propose \textbf{LE-MVCL} (Label-Efficient Encrypted Traffic Classification via Asymmetric Multi-View Contrastive Learning), a novel semi-supervised framework. Unlike standard contrastive approaches that rely on symmetric data augmentations, we introduce an \textit{Asymmetric Multi-View Pre-training} strategy where a Deep MLP processing global flow statistics acts as a "semantic guide" for a 1D-CNN encoder learning from raw payload bytes. This aligns the semantic representation of the payload with robust behavioral signatures without requiring manual labels. In the fine-tuning stage, we employ a \textit{Hybrid Late-Fusion} architecture, concatenating learned semantic embeddings with a comprehensive set of raw feature views—specifically \textit{Alpha} (Payload), \textit{Beta} (Flow Dynamics), \textit{Gamma} (Burst Behavior), and \textit{FFT} (Spectral Analysis)—to explicitly preserve granular domain properties often lost in pure neural encodings. Experimental results demonstrate superior label efficiency, with the model achieving a binary detection F1-score of \textbf{92.2\% using only 10\% labeled data} (scaling to 94.9\% with 30\% supervision), while effectively performing hierarchical classification of specific applications with \textbf{$>$91\% F1}, significantly mitigating the label scarcity problem in encrypted traffic analysis.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Contrastive Learning, Self-Supervised Learning, Label Efficiency, Encrypted Traffic Classification, VPN Detection.
+\end{IEEEkeywords}
+
+\input{section1_introduction}
+\input{section2_relatedworks}
+\input{section3_methodology}
+\input{section4_experiment}
+\input{section5_result}
+
+
+\section{Conclusion}
+The rapid proliferation of encrypted tunneling protocols has rendered traditional deep packet inspection obsolete, creating a critical dependency on Deep Learning frameworks that are inherently data-hungry. In this paper, we presented LE-MVCL, a novel framework designed to break this dependency through \textit{Asymmetric Multi-View Contrastive Learning}.
+
+Our work addresses the fundamental "duality" of network traffic by treating raw payload bytes and global flow statistics not as separate inputs, but as complementary views that guide each other. By aligning a deep 1D-CNN encoder with a robust statistical MLP during pre-training, we demonstrated that the statistical view acts as a "Semantic Guide," forcing the neural network to learn representations grounded in stable behavioral patterns rather than overfitting to volatile byte sequences. This approach yielded a decisive "Cold Start" advantage: LE-MVCL achieved a binary detection F1-score of 89.8\% using only 5\% of the labeled data, a threshold where standard supervised models effectively collapsed.
+
+Furthermore, we empirically validated the superiority of Direct Statistical Fusion over standard Deep Fusion. Our results confirmed that projecting engineering metrics (like spectral entropy or burst duration) through deep non-linear layers results in "Statistical Compression," smoothing out the granular anomalies necessary for fine-grained classification. By preserving these features in their raw form, LE-MVCL successfully distinguished isotocol VPN applications—such as distinguishing \textit{BitTorrent} from \textit{Skype}—with a Macro F1-score of 91.3\%, proving that hybrid architectures can outperform pure end-to-end deep learning in domain-specific tasks.
+
+While LE-MVCL sets a new benchmark for label efficiency, several avenues remain for future exploration:
+\begin{itemize}
+    \item Generalization to QUIC and ECH: As protocols evolve towards fully encrypted handshakes (e.g., TLS 1.3 Encrypted Client Hello and QUIC), the "Alpha" payload view may become less discriminative. Future work will investigate adapting the contrastive objective to focus more heavily on the \textit{temporal} structure of packet arrivals (e.g., using Flow Transformers) to compensate for the loss of header visibility.
+    \item Open-World Classification: Our current framework assumes a closed-world setting with a fixed set of VPN applications. Extending LE-MVCL to an \textit{Open-World} scenario—where the model must detect and cluster "Unknown" encrypted flows without retraining—would significantly enhance its utility for zero-day anomaly detection in Security Operations Centers.
+    \item Lightweight Edge Deployment: Although efficient in terms of labels, the dual-encoder architecture requires moderate computational resources. We plan to explore knowledge distillation techniques to compress the pre-trained LE-MVCL model into a lightweight student network suitable for deployment on resource-constrained edge routers or IoT gateways.
+\end{itemize}
+
+\section*{Acknowledgments}
+This should be a simple paragraph before the References to thank those individuals and institutions who have supported your work on this article.
+
+
+
+
+
+
+
+%{\appendices
+%\section*{Proof of the First Zonklar Equation}
+%Appendix one text goes here.
+% You can choose not to have a title for an appendix if you want by leaving the argument blank
+%\section*{Proof of the Second Zonklar Equation}
+%Appendix two text goes here.}
+
+
+
+% References
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+
+\newpage
+
+\section{Biography Section}
+If you have an EPS/PDF photo (graphicx package needed), extra braces are
+ needed around the contents of the optional argument to biography to prevent
+ the LaTeX parser from getting confused when it sees the complicated
+ $\backslash${\tt{includegraphics}} command within an optional argument. (You can create
+ your own custom macro containing the $\backslash${\tt{includegraphics}} command to make things
+ simpler here.)
+ 
+\vspace{11pt}
+
+\bf{If you include a photo:}\vspace{-33pt}
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{fig1}}]{Michael Shell}
+Use $\backslash${\tt{begin\{IEEEbiography\}}} and then for the 1st argument use $\backslash${\tt{includegraphics}} to declare and link the author photo.
+Use the author name as the 3rd argument followed by the biography text.
+\end{IEEEbiography}
+
+\vspace{11pt}
+
+\bf{If you will not include a photo:}\vspace{-33pt}
+\begin{IEEEbiographynophoto}{John Doe}
+Use $\backslash${\tt{begin\{IEEEbiographynophoto\}}} and the author name as the argument followed by the biography text.
+\end{IEEEbiographynophoto}
+
+
+
+
+\vfill
+
+\end{document}
+

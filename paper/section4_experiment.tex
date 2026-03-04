@@ -1,0 +1,108 @@
+\section{Experimental Setup}
+\label{sec:experimental_setup}
+
+\subsection{Datasets and Evaluation Strategy}
+\label{subsec:datasets_strategy}
+
+To rigoroulsy assess the proposed LE-MVCL framework, we implemented a comprehensive evaluation protocol using the ISCX-VPN-2016 benchmark. Our strategy deviates from standard "flat" classification approaches by adopting a Cascaded Hierarchical Training Strategy \cite{parchekani2020rejecting,wang2025taonet}, designed to mirror real-world security operations where the primary challenge lies specifically within encrypted tunnels.
+
+\subsubsection{The Cascaded Hierarchical Framework}
+We treat the classification pipeline as two distinct, specialized modules:
+
+\begin{enumerate}
+    \item Module 1: The Encrypted Gatekeeper (Binary Task).
+    The first module is trained on the complete dataset ($\mathcal{D}_{full}$), comprising both VPN and Non-VPN traffic. Its objective is to filter encrypted tunnels from standard background traffic. For this stage, we retain all available flows ($N \approx 12,555$) regardless of class size, ensuring the model learns to generalize across diverse traffic types.
+    
+    \item Module 2: The VPN Specialist (Fine-Grained Task).
+    Once traffic is identified as VPN-encapsulated, it is passed to the second module. Crucially, this module is trained \textit{exclusively} on the VPN subset ($\mathcal{D}_{vpn}$). We isolate the VPN traffic to prevent the model from learning "shortcuts" based on unencrypted clear-text signatures (e.g., HTTP headers) found in Non-VPN traffic. This ensures that the reported accuracy reflects the model's true ability to characterize obfuscated tunnels.
+\end{enumerate}
+
+\subsubsection{Class Curation for Fine-Grained Tasks}
+For the fine-grained experiments (Stage 2), we applied strict statistical curation to ensure validity.
+\begin{itemize}
+    \item Category Classification: We retained all 6 high-level categories (\textit{VoIP, Streaming, P2P, File Transfer, Email, Chat}). Even the smallest category (Email, 133 samples) provided sufficient data for stratified validation.
+    \item Application Classification: To avoid misleading results driven by statistically insignificant classes, we applied a hard selection threshold: only applications with $>100$ flows were retained. Consequently, we focused our evaluation on 6 dominant applications: \textit{VPN\_Skype, VPN\_BitTorrent, VPN\_Hangout, VPN\_Facebook, VPN\_YouTube,} and \textit{VPN\_Email}. Minor classes such as \textit{VPN\_Netflix} (47 samples) or \textit{VPN\_SFTP} (11 samples) were excluded from the application-level experiment to prevent overfitting to outliers.
+\end{itemize}
+
+\subsubsection{Secondary Benchmark: VNAT (Robustness)}
+To assess cross-domain generalization, we utilized the VNAT dataset solely for the Binary Task (Module 1). We employed a Few-Shot Transfer Learning strategy, reusing the pre-trained ISCX encoder and fine-tuning only the classifier head on small subsets of VNAT, to evaluate the robustness of the learned features across different network environments.
+
+\subsubsection{Label Scarcity Protocol}
+To validate our core contribution of Label Efficiency, we implemented a strict "Label Scarcity" training protocol. 
+\begin{itemize}
+    \item Phase I (Pre-training): The model is pre-trained on 100\% of the available training data \textit{without labels}, using the asymmetric contrastive objective.
+    \item Phase II (Fine-tuning): The pre-trained encoder is frozen, and the fusion layer is fine-tuned using random stratified subsets of the labeled data, specifically at 5\%, 10\%, 20\%, and 30\% ratios.
+\end{itemize}
+This protocol allows us to directly measure the marginal gain provided by the pre-training phase compared to supervised baselines trained on the same limited subsets.
+
+\subsubsection{Evaluation Metrics}
+Given the inherent class imbalance in network traffic (e.g., P2P traffic often outweighs Email), we prioritize the Macro-Averaged F1-Score as our primary performance metric, alongside Precision and Recall.
+
+\begin{equation}
+    \text{F1}_{macro} = \frac{1}{C} \sum_{i=1}^{C} \frac{2 \cdot \text{Precision}_i \cdot \text{Recall}_i}{\text{Precision}_i + \text{Recall}_i}
+\end{equation}
+
+This ensures that each class contributes equally to the final score, preventing majority classes from dominating the reported performance and providing a fair assessment under severe label scarcity.
+
+\subsection{Comparative Baselines}
+\label{subsec:baselines}
+
+To validate the three core pillars of our contribution—Label Efficiency, Asymmetric Alignment, and Direct Fusion—we benchmark LE-MVCL against four distinct categories of baselines. This comparative analysis is designed to isolate specific architectural decisions and prove their individual efficacy.
+
+\subsubsection{Group A: The "Necessity of Deep Learning" Baseline}
+A critical question in traffic analysis is whether complex Deep Learning is truly required, or if robust feature engineering suffices.
+\begin{itemize}
+    \item Stats-Only (XGBoost) \cite{chen2016xgboost}:
+    A lightweight Gradient Boosting model trained \textit{exclusively} on the concatenated "Greek" statistical features ($\beta, \gamma, \text{FFT}$). The 1D-CNN payload encoder is removed entirely.
+    \item \textit{Hypothesis Tested:} This baseline establishes the "performance ceiling" of pure statistical analysis. If LE-MVCL significantly outperforms this model, it proves that the learned payload representations ($\alpha$) capture semantic protocol signatures that are invisible to statistical metrics.
+\end{itemize}
+
+\subsubsection{Group B: Supervised Deep Learning (Label Efficiency Check)}
+These baselines represent the current state-of-the-art in fully supervised learning. They are trained from scratch using the categorical cross-entropy loss.
+\begin{itemize}
+    \item 1D-CNN (End-to-End) \cite{wang2017end}: 
+    The exact same convolutional architecture used in our LE-MVCL payload branch, but initialized with random weights and trained directly on the specific labeled subset (e.g., 10\%).
+    \item Deep Packet \cite{lotfollahi2020deep}: 
+    A standard Stacked Autoencoder (SAE) combined with a CNN, representing the established benchmark for encrypted traffic classification.
+    \item \textit{Hypothesis Tested:} By comparing LE-MVCL to the standard \textit{1D-CNN}, we isolate the marginal gain provided specifically by the pre-training phase. A large gap here validates our solution to the label scarcity problem.
+\end{itemize}
+
+\subsubsection{Group C: Symmetric Contrastive Learning (The "Asymmetric" Check)}
+To justify our novel "Asymmetric" strategy (aligning Payload $\leftrightarrow$ Stats), we compare it against a standard "Symmetric" Contrastive Learning approach typical of Computer Vision.
+\begin{itemize}
+    \item SimCLR-Net (Symmetric SSL) \cite{chen2020simple}: 
+    A uni-modal framework where the contrastive objective aligns two augmented views of the \textit{Payload only}.
+    \item \textit{Augmentation Strategy:} We employ "Byte Masking" (randomly zeroing out 10\% of the payload bytes) to generate the positive pairs.
+    \item \textit{Hypothesis Tested:} This baseline tests the "Semantic Guide" theory. If LE-MVCL outperforms SimCLR-Net, it proves that using robust Flow Statistics as the positive anchor is superior to using artificially augmented payload views.
+\end{itemize}
+
+\subsubsection{Group D: Fusion Architectures (The "Direct Fusion" Check)}
+Finally, we evaluate the impact of our fusion strategy on fine-grained classification.
+\begin{itemize}
+    \item Deep Fusion (Latent Concatenation) \cite{zeng2019deep}: 
+    A variation of our model where the statistical features are passed through a non-linear MLP (Dense-64 $\rightarrow$ ReLU) before concatenation. The fusion occurs in the abstract latent space ($Z_{pay} \oplus Z_{stat}$).
+    \item LE-MVCL (Ours - Direct Fusion): 
+    Our proposed approach where \textit{raw, normalized} statistical features are concatenated directly with the CNN embeddings.
+    \item \textit{Hypothesis Tested:} We hypothesize that Deep Fusion causes "manifold distortion," compressing vital statistical outliers. Superior performance by LE-MVCL would validate that preserving the granular precision of raw statistics is critical for distinguishing isotocol VPN applications.
+\end{itemize}
+
+\begin{table*}[htbp]
+\caption{Summary of Comparative Baselines and Evaluation Goals}
+\label{tab:baselines_summary}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{p{0.20\textwidth} p{0.20\textwidth} p{0.20\textwidth} p{0.32\textwidth}}
+\hline
+Baseline & Input Data & Learning Paradigm & Evaluation Goal \\
+\hline
+Stats-Only & Stats ($\beta, \gamma, \text{FFT}$) & Supervised (XGB) & Check necessity of Payload \\
+1D-CNN & Payload ($\alpha$) & Supervised (DL) & Check Label Efficiency \\
+SimCLR-Net & Payload Only & Symmetric CL & Check "Semantic Guide" Theory \\
+Deep Fusion & Payload + Stats & Late Fusion (MLP) & Check "Direct Fusion" Theory \\
+LE-MVCL & Payload + Stats & Asymmetric CL & Proposed Framework \\
+\hline
+\end{tabular}%
+}
+\end{table*}

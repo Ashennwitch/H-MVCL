@@ -1,0 +1,178 @@
+04_baseline_stats_only
+All in % macro F1.
+
+5% labeled:
+Stats Only (XGBoost)
+Binary:91
+Category:72
+App:74
+
+10% labeled:
+Stats Only (XGBoost):
+Binary:92
+Category:79
+App:83
+
+20% labeled:
+Stats Only (XGBoost):
+Binary:93
+Category:87
+App:87
+
+30% labeled:
+Stats Only (XGBoost):
+Binary:94
+Category:89
+App:88
+
+05_baseline_supervised_cnn:
+All in macro F1.
+
+5% labeled:
+>>> Running Supervised Baseline: Binary
+    Binary F1: 0.8350
+
+>>> Running Supervised Baseline: VPN Category
+    VPN Category F1: 0.6631
+
+>>> Running Supervised Baseline: VPN Apps
+    VPN Apps F1: 0.7609
+
+10% labeled:
+>>> Running Supervised Baseline: Binary
+    Binary F1: 0.8600
+
+>>> Running Supervised Baseline: VPN Category
+    VPN Category F1: 0.7421
+
+>>> Running Supervised Baseline: VPN Apps
+    VPN Apps F1: 0.8033
+
+20% labeled:
+>>> Running Supervised Baseline: Binary
+    Binary F1: 0.8926
+
+>>> Running Supervised Baseline: VPN Category
+    VPN Category F1: 0.7931
+
+>>> Running Supervised Baseline: VPN Apps
+    VPN Apps F1: 0.8684
+    
+30% labeled:
+>>> Running Supervised Baseline: Binary
+    Binary F1: 0.8935
+
+>>> Running Supervised Baseline: VPN Category
+    VPN Category F1: 0.8363
+
+>>> Running Supervised Baseline: VPN Apps
+    VPN Apps F1: 0.8654
+    
+06_baseline_deeppacket:
+All in macro F1.
+
+5% labeled:
+>>> Running Supervised Baseline: Binary
+    Binary F1: 0.8061
+
+>>> Running Supervised Baseline: VPN Category
+    VPN Category F1: 0.6780
+
+>>> Running Supervised Baseline: VPN Apps
+    VPN Apps F1: 0.7536
+
+10% labeled:
+>>> Running Supervised Baseline: Binary
+    Binary F1: 0.8499
+
+>>> Running Supervised Baseline: VPN Category
+    VPN Category F1: 0.7577
+
+>>> Running Supervised Baseline: VPN Apps
+    VPN Apps F1: 0.8344
+
+20% labeled:
+>>> Running Supervised Baseline: Binary
+    Binary F1: 0.8856
+
+>>> Running Supervised Baseline: VPN Category
+    VPN Category F1: 0.7861
+
+>>> Running Supervised Baseline: VPN Apps
+    VPN Apps F1: 0.8646
+
+30% labeled:
+>>> Running Supervised Baseline: Binary
+    Binary F1: 0.8918
+
+>>> Running Supervised Baseline: VPN Category
+    VPN Category F1: 0.8319
+
+>>> Running Supervised Baseline: VPN Apps
+    VPN Apps F1: 0.8738
+    
+07_simclr:
+All in macro F1.
+
+5% labeled:
+>>> SimCLR Baseline: Binary Task
+    F1 Score: 0.8842
+
+>>> SimCLR Baseline: VPN Category
+    F1 Score: 0.6521
+
+>>> SimCLR Baseline: VPN Top Apps
+    F1 Score: 0.7044
+
+10% labeled:
+>>> SimCLR Baseline: Binary Task
+    F1 Score: 0.9187
+
+>>> SimCLR Baseline: VPN Category
+    F1 Score: 0.7807
+
+>>> SimCLR Baseline: VPN Top Apps
+    F1 Score: 0.8550
+
+20% labeled:
+>>> SimCLR Baseline: Binary Task
+    F1 Score: 0.9306
+
+>>> SimCLR Baseline: VPN Category
+    F1 Score: 0.8223
+
+>>> SimCLR Baseline: VPN Top Apps
+    F1 Score: 0.8817
+
+30% labeled:
+>>> SimCLR Baseline: Binary Task
+    F1 Score: 0.9351
+
+>>> SimCLR Baseline: VPN Category
+    F1 Score: 0.8578
+
+>>> SimCLR Baseline: VPN Top Apps
+    F1 Score: 0.8952
+    
+08_Deep Fusion:
+All in % macro F1.
+
+5% labeled:
+Binary: 85
+Category: 75
+App: 84
+
+10% labeled:
+Binary: 88
+Category: 78
+App: 85
+
+20% labeled:
+Binary: 90
+Category: 83
+App: 89
+
+30% labeled:
+Binary: 91
+Category: 84
+App: 91
