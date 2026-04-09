@@ -25,7 +25,7 @@ For the fine-grained experiments (Stage 2), we applied strict statistical curati
 \end{itemize}
 
 \subsubsection{Secondary Benchmark: VNAT (Robustness)}
-To assess cross-domain generalization, we utilized the VNAT dataset solely for the Binary Task (Module 1). We employed a Few-Shot Transfer Learning strategy, reusing the pre-trained ISCX encoder and fine-tuning only the classifier head on small subsets of VNAT, to evaluate the robustness of the learned features across different network environments.
+To assess cross-domain generalization, we utilized the VNAT dataset solely for the Binary Task (Module 1). We employed a Zero-Shot Transfer strategy, training on ISCX and testing on VNAT without fine-tuning, to evaluate whether the learned distinction between "Encrypted" and "Standard" traffic holds across different network environments.
 
 \subsubsection{Label Scarcity Protocol}
 To validate our core contribution of Label Efficiency, we implemented a strict "Label Scarcity" training protocol. 
