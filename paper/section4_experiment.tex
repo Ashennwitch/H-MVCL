@@ -47,17 +47,9 @@ This ensures that each class contributes equally to the final score, preventing 
 \subsection{Comparative Baselines}
 \label{subsec:baselines}
 
-To validate the three core pillars of our contribution—Label Efficiency, Asymmetric Alignment, and Direct Fusion—we benchmark LE-MVCL against four distinct categories of baselines. This comparative analysis is designed to isolate specific architectural decisions and prove their individual efficacy.
+To validate the three core pillars of our contribution—Label Efficiency, Asymmetric Alignment, and Direct Fusion—we benchmark LE-MVCL against three distinct categories of baselines. This comparative analysis is designed to isolate specific architectural decisions and prove their individual efficacy.
 
-\subsubsection{Group A: The "Necessity of Deep Learning" Baseline}
-A critical question in traffic analysis is whether complex Deep Learning is truly required, or if robust feature engineering suffices.
-\begin{itemize}
-    \item Stats-Only (XGBoost) \cite{chen2016xgboost}:
-    A lightweight Gradient Boosting model trained \textit{exclusively} on the concatenated "Greek" statistical features ($\beta, \gamma, \text{FFT}$). The 1D-CNN payload encoder is removed entirely.
-    \item \textit{Hypothesis Tested:} This baseline establishes the "performance ceiling" of pure statistical analysis. If LE-MVCL significantly outperforms this model, it proves that the learned payload representations ($\alpha$) capture semantic protocol signatures that are invisible to statistical metrics.
-\end{itemize}
-
-\subsubsection{Group B: Supervised Deep Learning (Label Efficiency Check)}
+\subsubsection{Group A: Supervised Deep Learning (Label Efficiency Check)}
 These baselines represent the current state-of-the-art in fully supervised learning. They are trained from scratch using the categorical cross-entropy loss.
 \begin{itemize}
     \item 1D-CNN (End-to-End) \cite{wang2017end}: 
@@ -67,7 +59,7 @@ These baselines represent the current state-of-the-art in fully supervised learn
     \item \textit{Hypothesis Tested:} By comparing LE-MVCL to the standard \textit{1D-CNN}, we isolate the marginal gain provided specifically by the pre-training phase. A large gap here validates our solution to the label scarcity problem.
 \end{itemize}
 
-\subsubsection{Group C: Symmetric Contrastive Learning (The "Asymmetric" Check)}
+\subsubsection{Group B: Symmetric Contrastive Learning (The "Asymmetric" Check)}
 To justify our novel "Asymmetric" strategy (aligning Payload $\leftrightarrow$ Stats), we compare it against a standard "Symmetric" Contrastive Learning approach typical of Computer Vision.
 \begin{itemize}
     \item SimCLR-Net (Symmetric SSL) \cite{chen2020simple}: 
@@ -76,7 +68,7 @@ To justify our novel "Asymmetric" strategy (aligning Payload $\leftrightarrow$ S
     \item \textit{Hypothesis Tested:} This baseline tests the "Semantic Guide" theory. If LE-MVCL outperforms SimCLR-Net, it proves that using robust Flow Statistics as the positive anchor is superior to using artificially augmented payload views.
 \end{itemize}
 
-\subsubsection{Group D: Fusion Architectures (The "Direct Fusion" Check)}
+\subsubsection{Group C: Fusion Architectures (The "Direct Fusion" Check)}
 Finally, we evaluate the impact of our fusion strategy on fine-grained classification.
 \begin{itemize}
     \item Deep Fusion (Latent Concatenation) \cite{zeng2019deep}: 
@@ -96,9 +88,7 @@ Finally, we evaluate the impact of our fusion strategy on fine-grained classific
 \begin{tabular}{p{0.20\textwidth} p{0.20\textwidth} p{0.20\textwidth} p{0.32\textwidth}}
 \hline
 Baseline & Input Data & Learning Paradigm & Evaluation Goal \\
-\hline
-Stats-Only & Stats ($\beta, \gamma, \text{FFT}$) & Supervised (XGB) & Check necessity of Payload \\
-1D-CNN & Payload ($\alpha$) & Supervised (DL) & Check Label Efficiency \\
+\hline 1D-CNN & Payload ($\alpha$) & Supervised (DL) & Check Label Efficiency \\
 SimCLR-Net & Payload Only & Symmetric CL & Check "Semantic Guide" Theory \\
 Deep Fusion & Payload + Stats & Late Fusion (MLP) & Check "Direct Fusion" Theory \\
 LE-MVCL & Payload + Stats & Asymmetric CL & Proposed Framework \\

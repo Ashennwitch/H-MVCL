@@ -4,12 +4,31 @@
 \subsection{Evaluation of Label Efficiency}
 \label{subsec:res_label_efficiency}
 
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\columnwidth]{img/rank.png}
-    \caption{Global Feature Importance. The top 20 features reveal a hybrid dependency, where Gamma (Burst) features provide the highest information gain, supported by learned Alpha (Payload) embeddings.}
-    \label{fig:rank}
-\end{figure}
+\begin{table}[htbp]
+\caption{Top-10 Global Feature Importance (Information Gain)}
+\label{tab:rank}
+\centering
+\scriptsize % Reduces font size to save space
+\begin{tabular}{l l c}
+\hline
+\textbf{Rank} & \textbf{Feature Name} & \textbf{Component View} \\
+\hline
+1  & \texttt{gamma\_s2c\_burst\_pkts\_std}  & Gamma (Burst) \\
+2  & \texttt{alpha\_emb\_38}                & Alpha (Payload) \\
+3  & \texttt{gamma\_s2c\_burst\_pkts\_max}  & Gamma (Burst) \\
+4  & \texttt{alpha\_emb\_61}                & Alpha (Payload) \\
+5  & \texttt{fft\_s2c\_iat\_fft\_mean}      & FFT (Spectral) \\
+6  & \texttt{beta\_s2c\_size\_skew}         & Beta (Flow Stats) \\
+7  & \texttt{beta\_c2s\_size\_max}          & Beta (Flow Stats) \\
+8  & \texttt{gamma\_s2c\_burst\_pkts\_min}  & Gamma (Burst) \\
+9  & \texttt{gamma\_s2c\_burst\_pkts\_mean} & Gamma (Burst) \\
+10 & \texttt{beta\_c2s\_iat\_max}           & Beta (Flow Stats) \\
+\hline
+\multicolumn{3}{p{0.9\columnwidth}}{%
+\textit{Note:} The top features reveal a hybrid dependency, where Gamma (Burst) features provide the highest information gain, supported by learned Alpha (Payload) embeddings.%
+} \\
+\end{tabular}
+\end{table}
 
 \begin{figure}[t]
     \centering
@@ -71,7 +90,7 @@ VPN Application & 75.2\% & 84.6\% & 90.0\% & 91.3\% \\
 \end{table}
 
 \subsubsection{Comparative Analysis with Baselines}
-To benchmark these results, we compared LE-MVCL against four baselines: a lightweight statistical model (Stats-Only), two supervised deep learning models (1D-CNN, Deep Packet), and a symmetric contrastive model (SimCLR). Table \ref{tab:baseline_comparison} summarizes the performance gap ($\Delta$) between each baseline and LE-MVCL at the critical 5\% and 30\% thresholds.
+To benchmark these results, we compared LE-MVCL against three baselines: two supervised deep learning models (1D-CNN, Deep Packet), and a symmetric contrastive model (SimCLR). Table \ref{tab:baseline_comparison} summarizes the performance gap ($\Delta$) between each baseline and LE-MVCL at the critical 5\% and 30\% thresholds.
 
 \begin{table*}[htbp]
 \caption{Comprehensive Baseline Comparison (Macro F1-Score). \\ Models marked with ($^\dagger$) utilize unlabeled data for pre-training (Semi-Supervised), while others rely solely on the labeled subset (Supervised).}
@@ -83,7 +102,6 @@ To benchmark these results, we compared LE-MVCL against four baselines: a lightw
 \multirow{2}{*}{\textbf{Model}} & \multicolumn{4}{c|}{\textbf{Binary Detection}} & \multicolumn{4}{c|}{\textbf{VPN Category}} & \multicolumn{4}{c}{\textbf{VPN Application}} \\
  & \textbf{5\%} & \textbf{10\%} & \textbf{20\%} & \textbf{30\%} & \textbf{5\%} & \textbf{10\%} & \textbf{20\%} & \textbf{30\%} & \textbf{5\%} & \textbf{10\%} & \textbf{20\%} & \textbf{30\%} \\
 \hline
-Stats-Only (XGB) & \textbf{91.0} & 92.0 & 93.0 & 94.0 & 72.0 & \textbf{79.0} & \textbf{87.0} & \textbf{89.0} & 74.0 & 83.0 & 87.0 & 88.0 \\
 1D-CNN \cite{wang2017end} & 83.5 & 86.0 & 89.3 & 89.4 & 66.3 & 74.2 & 79.3 & 83.6 & 76.1 & 80.3 & 86.8 & 86.5 \\
 Deep Packet \cite{lotfollahi2020deep} & 80.6 & 85.0 & 88.6 & 89.2 & 67.8 & 75.8 & 78.6 & 83.2 & 75.4 & 83.4 & 86.5 & 87.4 \\
 Deep Fusion \cite{zeng2019deep} & 85.0 & 88.0 & 90.0 & 91.0 & \textbf{75.0} & 78.0 & 83.0 & 84.0 & \textbf{84.0} & 85.0 & 89.0 & 91.0 \\
@@ -96,10 +114,10 @@ SimCLR (Symmetric) $^\dagger$ & 88.4 & 91.9 & 93.1 & 93.5 & 65.2 & 78.1 & 82.2 &
 \end{table*}
 
 Superiority in Binary Detection:
-LE-MVCL consistently outperforms the deep learning baselines in the binary task. At 5\% labels, it exceeds the Supervised 1D-CNN by 6.3\% and Deep Packet by 9.2\%. While the Stats-Only model shows a slight initial advantage (+1.2\%), LE-MVCL overtakes it at 30\% (+0.9\%), proving that the learned payload representations provide scalability that pure statistics lack.
+LE-MVCL consistently outperforms the deep learning baselines in the binary task. At 5\% labels, it exceeds the Supervised 1D-CNN by 6.3\% and Deep Packet by 9.2\%.
 
 Scalability in Fine-Grained Tasks:
-In the application identification task, LE-MVCL demonstrates superior long-term performance. At 30\% label density, it achieves the highest F1-score of 91.3\%, surpassing Stats-Only (88.0\%) and SimCLR (89.5\%). Although the Deep Fusion baseline shows strong initial performance in Application identification at 5\%, LE-MVCL closes the gap at 30\% (91.3\% vs 91.0\%), while consistently outperforming it in the Binary domain (89.8\% vs 85.0\% at 5\% labels), highlighting the robustness of our Direct Fusion strategy.
+In the application identification task, LE-MVCL demonstrates superior long-term performance. At 30\% label density, it achieves the highest F1-score of 91.3\%, surpassing SimCLR (89.5\%). Although the Deep Fusion baseline shows strong initial performance in Application identification at 5\%, LE-MVCL closes the gap at 30\% (91.3\% vs 91.0\%), while consistently outperforming it in the Binary domain (89.8\% vs 85.0\% at 5\% labels), highlighting the robustness of our Direct Fusion strategy.
 
 \subsection{Hierarchical Classification Performance}
 \label{subsec:res_hierarchical}

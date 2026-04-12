@@ -4,31 +4,7 @@
 \subsection{Dataset Curation and Preprocessing}
 \label{subsec:dataset_curation}
 
-To ensure robust generalization across different network environments, we utilized two distinct encrypted traffic datasets: the widely-used ISCX-VPN-2016 benchmark and the VNAT dataset.
-
-\subsubsection{Data Sources}
-\begin{itemize}
-    \item ISCX-VPN-2016 \cite{draper2016characterization}: The primary benchmark for encrypted traffic analysis, containing real-world traffic generated from Alice and Bob scenarios. It encompasses 7 specific traffic categories (e.g., Browsing, Email, Streaming) and 16 granular applications captured over both standard and VPN channels.
-    \item VNAT (VPN/Non-VPN Application Traffic) \cite{vnat_dataset}: To augment the diversity of our training corpus, we incorporated the VNAT dataset from MIT Lincoln Laboratory. This dataset includes PCAP captures of both encrypted and unencrypted flows across 10 distinct applications (including SSH, RDP, and Zoiper) generated in a controlled virtual subnet environment, providing high-fidelity samples for background traffic and specific tunneling behaviors.
-\end{itemize}
-
-% Use figure* (with an asterisk) for full-width images
-\begin{figure*}[ht] 
-    \centering
-    % width=\textwidth fills the printable area from left margin to right margin
-    \includegraphics[width=\textwidth]{iscx_dist.png}
-    \caption{Distribution of the clean ISCX dataset.}
-    \label{fig:iscx_dist}
-\end{figure*}
-
-% Use figure* (with an asterisk) for full-width images
-\begin{figure*}[ht] 
-    \centering
-    % width=\textwidth fills the printable area from left margin to right margin
-    \includegraphics[width=\textwidth]{vnat_dist.png}
-    \caption{Distribution of the clean VNAT dataset.}
-    \label{fig:vnat_dist}
-\end{figure*}
+To ensure robust generalization across diverse network environments, we utilized the widely established ISCX-VPN-2016 benchmark \cite{draper2016characterization} as our primary corpus, augmented with the VNAT dataset \cite{vnat_dataset} to introduce a wider variety of background traffic and specific tunneling behaviors. Raw packet captures from both datasets were first segmented into bidirectional flows based on the standard 5-tuple identifier using the SplitCap tool. To maintain high data fidelity and ensure comparability with recent baselines \cite{park2024fast}, we applied a rigorous preprocessing pipeline, summarized in Table \ref{tab:preprocessing_rules}. This protocol explicitly filters out irrelevant infrastructure noise (such as DNS, NTP, DHCP, and specific NetBIOS/LLMNR ports) alongside recurrent UDP broadcast beacons lacking user-generated content. Finally, we guaranteed structural integrity by discarding TCP connections that omit the initial \texttt{SYN} handshake and pruning overly short flows (fewer than two packets) that lack sufficient temporal and payload data for robust multi-view feature extraction.
 
 \begin{table}[htbp]
 \caption{Summary of Preprocessing Rules}
@@ -46,25 +22,6 @@ Min Length & Packet Count $< 2$ & Drop \\
 \hline
 \end{tabular}
 \end{table}
-
-\subsubsection{Preprocessing Pipeline}
-Raw packet captures were first segmented into bidirectional flows based on the standard 5-tuple identifier (Source IP, Destination IP, Source Port, Destination Port, Protocol) using the SplitCap tool. To ensure data quality and comparability with state-of-the-art benchmarks, we strictly implemented the cleaning and filtering protocol defined by Park et al. \cite{park2024fast}. The pipeline consists of four critical stages that are summarized in Table \ref{tab:preprocessing_rules}.
-
-\begin{enumerate}
-    \item Noise \& Background Traffic Removal:
-    We filtered out infrastructure traffic irrelevant to the target application classification. This includes removing protocols such as DNS (Port 53), NTP (Port 123), and DHCP (Port 67/68). Additionally, consistent with \cite{park2024fast}, we explicitly dropped NetBIOS Name Service (NBNS) traffic on UDP port 137 and Link-Local Multicast Name Resolution (LLMNR) on UDP port 5355.
-
-    \item TCP Connection Sanity Check:
-    To ensure the integrity of TCP flows used for payload analysis, we discarded any TCP flow that did not begin with a valid handshake initiation. Specifically, we filtered out flows where the first packet did not contain the \texttt{SYN} flag (Flag 'S'), eliminating incomplete or mid-stream captured connections.
-
-    \item Beacon \& Broadcast Filtering:
-    We observed specific recurrent UDP broadcast patterns that do not carry user-generated content. We applied a rule to remove UDP flows directed to the broadcast IP \texttt{255.255.255.255} that contained the specific payload signature ``\texttt{Beacon$\sim$}''. This step is crucial for removing local discovery noise that can skew statistical feature distributions.
-    
-    \item Short Flow Pruning:
-    Flows containing fewer than 2 packets were discarded as they lack sufficient information for both the temporal statistical view (Inter-Arrival Times) and the payload contrastive view.
-\end{enumerate}
-
-Following this rigorous filtration process, we obtained a final dataset that is based on its distribution as shown in Fig. \ref{fig:iscx_dist} and \ref{fig:vnat_dist}.
 
 
 % ==========================
