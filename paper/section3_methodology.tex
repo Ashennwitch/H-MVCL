@@ -172,22 +172,7 @@ Upon completion of pre-training, we discard the MLP encoder and the projection h
 where $\hat{x}$ represents the Z-score normalized vectors of the flow dynamics, burst behavior, and spectral features. This hybrid approach ensures the model leverages the non-linear pattern recognition of the CNN (for obfuscation detection) while preserving the explicit resolution of metrics like Inter-Arrival Time (IAT) and burst duration, which are critical for distinguishing fine-grained VPN services (e.g., distinguishing Skype's VoIP patterns from Hangouts).
 
 \subsubsection{Supervised Fine-Tuning}
-The fused vector $\mathbf{v}_{final}$ is fed into an Extreme Gradient Boosting (XGBoost) classifier for the final decision. This ensemble method effectively handles the heterogeneity of the fused features. After extensive hyperparameter tuning, we selected the best-performing XGBoost configuration for the hybrid feature vector, as summarized in Table~\ref{tab:xgb_hyperparams}:
-
-\begin{table}[htbp]
-\centering
-\caption{Best-performing XGBoost hyperparameters for the hybrid feature vector.}
-\label{tab:xgb_hyperparams}
-\begin{tabular}{l l}
-\hline
-\textbf{Hyperparameter} & \textbf{Value} \\
-\hline
-Estimators & 200 \\
-Max Depth & 6 \\
-Learning Rate & 0.05 \\
-Subsample/Colsample & 0.8 \\
-\hline
-\end{tabular}
-\end{table}
+The fused vector $\mathbf{v}_{final}$ is fed into an Extreme Gradient Boosting (XGBoost) classifier for the final decision. This ensemble method effectively handles the heterogeneity of the fused features.
+After extensive hyperparameter tuning, our final XGBoost configuration utilized 200 estimators, a maximum depth of 6, a learning rate of 0.05, and a subsample/colsample ratio of 0.8.
 
 To handle class imbalance (e.g., rare VPN applications), we apply a \textit{Sample Weighting} strategy where weights are inversely proportional to class frequencies during the tree building process.
